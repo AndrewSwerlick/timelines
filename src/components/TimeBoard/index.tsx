@@ -8,7 +8,9 @@ import {
   addMoment,
 } from "../../entities/timeline";
 import { ChapterSquare } from "../../components/ChapterSquare";
+import { AddChapterButton } from "../AddChapterButton";
 import { Arrow } from "../../components/graphics/Arrow";
+
 import { getMockTitle } from "../../entities/mocks";
 
 export const TimeBoard: React.FC = () => {
@@ -66,6 +68,8 @@ export const TimeBoard: React.FC = () => {
     }
   }, [sourceTimeline?.id, branchingMoment?.id]);
 
+  const currentTimeline = Object.values(timelines.entities)[0];
+
   return (
     <svg style={{ margin: "30px" }} width="90%" height="100vh">
       {Object.entries(layout)
@@ -84,6 +88,7 @@ export const TimeBoard: React.FC = () => {
             </g>
           );
         })}
+      {currentTimeline && <AddChapterButton />}
     </svg>
   );
 };

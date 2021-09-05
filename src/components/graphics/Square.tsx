@@ -1,11 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import rough from "roughjs/bin/rough";
+import { Graphic } from "./data";
 
-export const Square: React.FC<{
-  x: number;
-  y: number;
-  size: number;
-}> = ({ x, y, size = 50, children }) => {
+export const Square: React.FC<Graphic> = ({ x, y, size = 50, children }) => {
   const gElement = useRef<SVGGElement>(null);
 
   useEffect(() => {

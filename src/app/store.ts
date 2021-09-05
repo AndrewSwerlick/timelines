@@ -5,12 +5,13 @@ import {
   EntityState,
 } from "@reduxjs/toolkit";
 import timelineReducer from "../entities/timeline";
-import { Timeline, Moment, BranchPoint } from "../entities/data";
+import { Timeline, Moment, BranchPoint, UIState } from "../entities/data";
 
 export type RootState = {
   timelines: EntityState<Timeline>;
   moments: EntityState<Moment>;
   branchPoints: EntityState<BranchPoint>;
+  ui: UIState;
 };
 
 export const store = configureStore<RootState>({

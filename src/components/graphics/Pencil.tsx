@@ -1,8 +1,7 @@
-export const Pencil: React.FC<{ x: number; y: number; size: number }> = ({
-  x,
-  y,
-  size,
-}) => {
+import React from "react";
+import { Graphic } from "./data";
+
+export const Pencil: React.FC<Graphic> = ({ x, y, size }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"

@@ -36,10 +36,10 @@ export const timelineSlice = createSlice({
     timelines: timelineAdapter.getInitialState(),
     moments: momentAdapter.getInitialState(),
     branchPoints: branchPointAdapter.getInitialState(),
+    ui: {},
   },
   reducers: {
     branchTimeline(state, action: PayloadAction<BranchTimelineAction>) {
-      // copy all moment ids up to the branchingMoment
       const source = action.payload.source;
       const branchingMoment = action.payload.branchingMoment;
       const branchPointId = branchingMoment.branchPointId || branchingMoment.id;
@@ -136,6 +136,14 @@ export const getBranchPointsByTimelineId = (state: RootState) => {
   });
 
   return byTimelineId;
+};
+
+export const getCurrentTimeline = (state: RootState) => {
+  if (state.ui.currentTimelineId) {
+    return state.timelines.entities[state.ui.currentTimelineId];
+  } else if (state.timelines.ids.length > 0) {
+    return state.timelines.entities[state.timelines.ids[0]];
+  }
 };
 
 export default timelineSlice.reducer;
