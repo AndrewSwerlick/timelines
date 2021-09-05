@@ -9,8 +9,9 @@ export interface Moment {
     branchPointId?: string;
     // fortunes: Fortune[]
     // failures: Failure[]
-    // narrative: string
+    narrative?: string
     // fixed: boolean
+    title?: string;
     timelineId?: string;
 }
 

@@ -1,17 +1,21 @@
 import React, { useEffect, useRef } from "react";
 import rough from "roughjs/bin/rough";
 
-export const Square: React.FC<{ x: number; y: number; size: number }> = ({
-  x,
-  y,
-  size = 50,
-}) => {
+export const Square: React.FC<{
+  x: number;
+  y: number;
+  size: number;
+}> = ({ x, y, size = 50, children }) => {
   const gElement = useRef<SVGGElement>(null);
+
   useEffect(() => {
     if (gElement.current) {
       gElement.current.innerHTML = "";
       const rc = rough.svg(gElement.current.closest("svg")!);
-      const node = rc.rectangle(x, y, size, size);
+      const node = rc.rectangle(x, y, size, size, {
+        fill: "white",
+        fillStyle: "solid",
+      });
       gElement.current.append(...Array.from(node.children));
     }
     return () => {
@@ -21,5 +25,12 @@ export const Square: React.FC<{ x: number; y: number; size: number }> = ({
     };
   }, [x, y, gElement]);
 
-  return <g ref={gElement}></g>;
+  return (
+    <>
+      <g ref={gElement} style={{ cursor: "pointer" }}></g>
+      <svg x={x} y={y} width={size} height={size} viewBox="0 0 100 100">
+        {children}
+      </svg>
+    </>
+  );
 };

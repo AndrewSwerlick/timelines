@@ -25,6 +25,7 @@ export const Arrow: React.FC<Line> = ({ start, end }) => {
   const svgElement = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
+    console.log("drawing arrow", { start, end });
     if (svgElement.current) {
       svgElement.current.innerHTML = "";
       const rc = rough.svg(svgElement.current);
@@ -39,7 +40,7 @@ export const Arrow: React.FC<Line> = ({ start, end }) => {
       svgElement.current.appendChild(head1);
       svgElement.current.appendChild(head2);
     }
-  });
+  }, [start.x, start.y, end.x, end.y]);
 
   return <svg ref={svgElement}></svg>;
 };

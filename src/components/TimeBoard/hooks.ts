@@ -3,10 +3,20 @@ import { getBranchPointsByTimelineId } from "../../entities/timeline";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 
 interface TimeBoardLayout {
-  [index: string]: { x: number; y: number; next: string };
+  [index: string]: { x: number; y: number; next: string; visible: boolean };
 }
 
-export const useTimeboardLayout = () => {
+interface TimeBoardLayoutOptions {
+  momentSize: number;
+  horizontalSpacing: number;
+  verticalSpacing: number;
+}
+
+export const useTimeboardLayout = ({
+  momentSize,
+  horizontalSpacing,
+  verticalSpacing,
+}: TimeBoardLayoutOptions) => {
   const layout: TimeBoardLayout = {};
   const timelines = useAppSelector((state) => state.timelines);
   const branchPointsByTimelineId = useAppSelector(getBranchPointsByTimelineId);
@@ -37,6 +47,7 @@ export const useTimeboardLayout = () => {
               x: basePosition.x + 10 * (index + 1),
               y: basePosition.y + 10 * (index + 1),
               next: branchTimeline?.momentIds[order + 1],
+              visible: false,
             };
           }
           const nextTimeline = timelines.entities[branch.timelineId]!;
@@ -59,9 +70,10 @@ export const useTimeboardLayout = () => {
     timeline.momentIds.forEach((momentId, index) => {
       if (!layout[momentId]) {
         layout[momentId] = {
-          x: index * 150,
-          y: row * 150 + 30,
+          x: index * (momentSize + horizontalSpacing),
+          y: row * (momentSize + verticalSpacing),
           next: timeline.momentIds[index + 1],
+          visible: true,
         };
       }
     });

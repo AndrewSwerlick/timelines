@@ -21,6 +21,13 @@ interface BranchTimelineAction {
 interface AddMomentAction {
   momentId: string;
   timelineId: string;
+  title: string;
+}
+
+interface EditMomentAction {
+  momentId: string;
+  title: string;
+  narrative: string;
 }
 
 export const timelineSlice = createSlice({
@@ -88,6 +95,7 @@ export const timelineSlice = createSlice({
       momentAdapter.addOne(state.moments, {
         id: action.payload.momentId,
         timelineId: action.payload.timelineId,
+        title: action.payload.title,
       });
       const { timelineId } = action.payload;
       const newMoments = [
@@ -99,6 +107,13 @@ export const timelineSlice = createSlice({
         changes: { momentIds: newMoments },
       });
     },
+    editMoment: (state, action: PayloadAction<EditMomentAction>) => {
+      const { title, narrative, momentId } = action.payload;
+      momentAdapter.updateOne(state.moments, {
+        id: momentId,
+        changes: { title, narrative },
+      });
+    },
   },
 });
 
@@ -106,6 +121,7 @@ export const {
   createNewTimeline,
   branchTimeline,
   addMoment,
+  editMoment,
 } = timelineSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
