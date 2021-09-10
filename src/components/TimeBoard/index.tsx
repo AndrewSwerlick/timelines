@@ -36,7 +36,6 @@ export const TimeBoard: React.FC = () => {
     [...Array(5)].forEach((_, index) => {
       const momentId = uuidv4();
       setTimeout(() => {
-        console.log("adding");
         dispatch(addMoment({ timelineId, momentId, title: getMockTitle() }));
       }, index * 500);
     });
@@ -46,39 +45,29 @@ export const TimeBoard: React.FC = () => {
     setupTimeline();
   }, []);
 
-  useEffect(() => {
-    if (sourceTimeline && branchingMoment) {
-      setTimeout(() => {
-        const timelineId = uuidv4();
-        dispatch(
-          branchTimeline({
-            newTimelineId: timelineId,
-            source: sourceTimeline,
-            branchingMoment,
-          })
-        );
-        dispatch(
-          addMoment({
-            momentId: uuidv4(),
-            timelineId: timelineId,
-            title: getMockTitle(),
-          })
-        );
-      }, 1000);
-    }
-  }, [sourceTimeline?.id, branchingMoment?.id]);
-
   const currentTimeline = Object.values(timelines.entities)[0];
+  const maxX = Math.max(...Object.entries(layout).map(([_, { x }]) => x));
+  const maxY = Math.max(...Object.entries(layout).map(([_, { y }]) => y));
 
   return (
-    <svg style={{ margin: "30px" }} width="90%" height="100vh">
+    <svg
+      style={{ margin: "30px", overflow: "scroll" }}
+      width={`${maxX + 400}px`}
+      height={`${maxY + 400}px`}
+    >
       {Object.entries(layout)
         .sort(([_, { visible }]) => (!visible ? -1 : 1))
-        .map(([id, { x, y, next }]) => {
+        .map(([id, { x, y, next, visible }]) => {
           const moment = moments.entities[id]!;
           return (
             <g data-momentId={id} key={id}>
-              <ChapterSquare x={x} y={y} size={120} moment={moment} />
+              <ChapterSquare
+                x={x}
+                y={y}
+                size={120}
+                moment={moment}
+                visible={visible}
+              />
               {layout[next] && (
                 <Arrow
                   start={{ x: x + 135, y: y + 30 }}

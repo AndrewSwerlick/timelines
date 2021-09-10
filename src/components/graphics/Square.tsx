@@ -25,7 +25,7 @@ export const Square: React.FC<Graphic> = ({ x, y, size = 50, children }) => {
   return (
     <>
       <g ref={gElement} style={{ cursor: "pointer" }}></g>
-      <svg x={x} y={y} width={size} height={size} viewBox="0 0 100 100">
+      <svg x={x} y={y} width={size} height={size} viewBox="0 0 100 100" overflow="visible">
         {children}
       </svg>
     </>

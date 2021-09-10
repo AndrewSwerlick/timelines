@@ -1,13 +1,16 @@
 import React from "react";
 import { Text } from "@visx/text";
 import { Dialog } from "@reach/dialog";
+import styled from "styled-components";
+import "@reach/dialog/styles.css";
+import { v4 as uuidv4 } from "uuid";
 import { Pencil } from "../graphics/Pencil";
 import { Square } from "../graphics/Square";
-import "@reach/dialog/styles.css";
-import VisuallyHidden from "@reach/visually-hidden";
-import styled from "styled-components";
+import { CirclePlus } from "../graphics/CirclePlus";
+import { useAppDispatch } from "../../app/hooks";
 import { Moment } from "../../entities/data";
 import { ChapterView } from "../ChapterView";
+import { branchTimeline } from "../../entities/timeline";
 
 const Editor = styled(Dialog)`
   border-radius: 15px 5px 5px 25px/5px 25px 25px 5px;
@@ -23,10 +26,12 @@ export const ChapterSquare: React.FC<{
   y: number;
   size: number;
   moment: Moment;
-}> = ({ x, y, size = 50, moment }) => {
+  visible: boolean;
+}> = ({ x, y, size = 50, moment, visible }) => {
   const [showDialog, setShowDialog] = React.useState(false);
   const open = () => setShowDialog(true);
   const close = () => setShowDialog(false);
+  const dispatch = useAppDispatch();
 
   return (
     <>
@@ -53,6 +58,21 @@ export const ChapterSquare: React.FC<{
           fillOpacity={0}
           style={{ cursor: "pointer" }}
         />
+        {visible && (
+          <CirclePlus
+            x={35}
+            y={100}
+            size={30}
+            onClick={() => {
+              dispatch(
+                branchTimeline({
+                  newTimelineId: uuidv4(),
+                  branchingMoment: moment,
+                })
+              );
+            }}
+          />
+        )}
       </Square>
       <Editor isOpen={showDialog} onDismiss={close}>
         <ChapterView close={close} moment={moment} />

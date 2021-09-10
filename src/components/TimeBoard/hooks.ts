@@ -1,6 +1,7 @@
-import { Timeline, Moment, BranchPoint } from "../../entities/data";
+import { Timeline } from "../../entities/data";
 import { getBranchPointsByTimelineId } from "../../entities/timeline";
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import { useAppSelector } from "../../app/hooks";
+import _ from "lodash";
 
 interface TimeBoardLayout {
   [index: string]: { x: number; y: number; next: string; visible: boolean };
@@ -20,58 +21,59 @@ export const useTimeboardLayout = ({
   const layout: TimeBoardLayout = {};
   const timelines = useAppSelector((state) => state.timelines);
   const branchPointsByTimelineId = useAppSelector(getBranchPointsByTimelineId);
+  let rows = 0;
 
-  function addBranchPointsToLayout({
-    timeline,
-    currentRow,
-  }: {
-    timeline: Timeline;
-    currentRow: number;
-  }) {
+  function addBranchPointsToLayout({ timeline }: { timeline: Timeline }) {
     const branchPoints = branchPointsByTimelineId[timeline.id] || [];
 
-    branchPoints.reverse().forEach((branchPoint) => {
-      const sourceMomentId = branchPoint.branches.find(
-        (branch) => branch.timelineId == branchPoint.sourceTimelineId
-      )!.momentId;
+    const inReverseTimelineOrder = _.sortBy(branchPoints, (branchPoint) => {
+      return (
+        timelines.entities[branchPoint.sourceTimelineId]!.momentIds.indexOf(
+          branchPoint.id
+        ) * -1
+      );
+    });
+
+    inReverseTimelineOrder.forEach((branchPoint) => {
+      const sourceMomentId = branchPoint.id;
       const basePosition = layout[sourceMomentId];
 
-      branchPoint.branches
-        .filter((branch) => !layout[branch.momentId])
-        .forEach((branch, index) => {
-          if (!layout[branch.momentId]) {
-            const branchTimeline = timelines.entities[branch.timelineId]!;
-            const order = branchTimeline.momentIds.indexOf(branch.momentId);
+      const secondaryBranches = branchPoint.branches.filter(
+        (branch) => !layout[branch.momentId]
+      );
 
-            layout[branch.momentId] = {
-              x: basePosition.x + 10 * (index + 1),
-              y: basePosition.y + 10 * (index + 1),
-              next: branchTimeline?.momentIds[order + 1],
-              visible: false,
-            };
-          }
-          const nextTimeline = timelines.entities[branch.timelineId]!;
-          addTimelineToLayout({ timeline: nextTimeline, row: currentRow + 1 });
-          addBranchPointsToLayout({
-            timeline: nextTimeline,
-            currentRow: currentRow + 1,
-          });
+      secondaryBranches.forEach((branch, index) => {
+        if (!layout[branch.momentId]) {
+          const branchTimeline = timelines.entities[branch.timelineId]!;
+          const timelineOrder = branchTimeline.momentIds.indexOf(
+            branch.momentId
+          );
+
+          layout[branch.momentId] = {
+            x: basePosition.x - 10 * (index + 1),
+            y: basePosition.y - 10 * (index + 1),
+            next: branchTimeline?.momentIds[timelineOrder + 1],
+            visible: false,
+          };
+        }
+        const branchTimeline = timelines.entities[branch.timelineId]!;
+
+        rows = rows + 1;
+
+        addTimelineToLayout({ timeline: branchTimeline });
+        addBranchPointsToLayout({
+          timeline: branchTimeline,
         });
+      });
     });
   }
 
-  function addTimelineToLayout({
-    timeline,
-    row,
-  }: {
-    timeline: Timeline;
-    row: number;
-  }) {
+  function addTimelineToLayout({ timeline }: { timeline: Timeline }) {
     timeline.momentIds.forEach((momentId, index) => {
       if (!layout[momentId]) {
         layout[momentId] = {
           x: index * (momentSize + horizontalSpacing),
-          y: row * (momentSize + verticalSpacing),
+          y: rows * (momentSize + verticalSpacing),
           next: timeline.momentIds[index + 1],
           visible: true,
         };
@@ -79,10 +81,10 @@ export const useTimeboardLayout = ({
     });
   }
 
-  timelines.ids.forEach((id) => {
-    const timeline = timelines.entities[id]!;
-    addTimelineToLayout({ timeline, row: 0 });
-    addBranchPointsToLayout({ timeline, currentRow: 0 });
-  });
+  const firstTimeline = timelines.entities[timelines.ids[0]];
+  if (firstTimeline) {
+    addTimelineToLayout({ timeline: firstTimeline });
+    addBranchPointsToLayout({ timeline: firstTimeline });
+  }
   return layout;
 };

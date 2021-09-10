@@ -12,7 +12,7 @@ export interface Moment {
   narrative?: string;
   // fixed: boolean
   title?: string;
-  timelineId?: string;
+  timelineId: string;
 }
 
 export interface BranchPoint {

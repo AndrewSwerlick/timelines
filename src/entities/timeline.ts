@@ -14,7 +14,6 @@ const branchPointAdapter = createEntityAdapter<BranchPoint>();
 
 interface BranchTimelineAction {
   newTimelineId: string;
-  source: Timeline;
   branchingMoment: Moment;
 }
 
@@ -40,14 +39,17 @@ export const timelineSlice = createSlice({
   },
   reducers: {
     branchTimeline(state, action: PayloadAction<BranchTimelineAction>) {
-      const source = action.payload.source;
       const branchingMoment = action.payload.branchingMoment;
       const branchPointId = branchingMoment.branchPointId || branchingMoment.id;
-      const newMoment = {
+      const source = state.timelines.entities[branchingMoment.timelineId]!;
+      const newBranchMomentPartial = {
         id: uuidv4(),
         branchPointId,
       };
-      momentAdapter.addOne(state.moments, newMoment);
+      const newMomentPartial = {
+        id: uuidv4(),
+      };
+
       momentAdapter.updateOne(state.moments, {
         id: branchingMoment.id,
         changes: { branchPointId: branchPointId },
@@ -57,9 +59,19 @@ export const timelineSlice = createSlice({
         momentIds: _.takeWhile(
           source.momentIds,
           (id) => id !== branchingMoment.id
-        ).concat([newMoment.id]),
+        ).concat([newBranchMomentPartial.id, newMomentPartial.id]),
       };
       timelineAdapter.addOne(state.timelines, timeline);
+      const newBranchMoment = {
+        ...newBranchMomentPartial,
+        timelineId: timeline.id,
+      };
+      const newMoment = {
+        ...newMomentPartial,
+        timelineId: timeline.id,
+      };
+      momentAdapter.addMany(state.moments, [newBranchMoment, newMoment]);
+
       let branchPoint = state.branchPoints.entities[branchPointId];
       if (branchPoint) {
         branchPointAdapter.updateOne(state.branchPoints, {
@@ -68,7 +80,7 @@ export const timelineSlice = createSlice({
             branches: branchPoint.branches.concat([
               {
                 timelineId: timeline.id,
-                momentId: newMoment.id,
+                momentId: newBranchMoment.id,
               },
             ]),
           },
@@ -76,10 +88,13 @@ export const timelineSlice = createSlice({
       } else {
         branchPointAdapter.addOne(state.branchPoints, {
           id: branchPointId,
-          sourceTimelineId: source.id,
+          sourceTimelineId: branchingMoment.timelineId,
           branches: [
-            { timelineId: source.id, momentId: branchingMoment.id },
-            { timelineId: timeline.id, momentId: newMoment.id },
+            {
+              timelineId: branchingMoment.timelineId,
+              momentId: branchingMoment.id,
+            },
+            { timelineId: timeline.id, momentId: newBranchMoment.id },
           ],
         });
       }
@@ -128,11 +143,11 @@ export const {
 export const getBranchPointsByTimelineId = (state: RootState) => {
   const byTimelineId: { [index: string]: BranchPoint[] } = {};
   Object.values(state.branchPoints.entities).forEach((branchPoint) => {
-    branchPoint?.branches.forEach((branch) => {
-      const branches = byTimelineId[branch.timelineId] || [];
+    if (branchPoint) {
+      const branches = byTimelineId[branchPoint.sourceTimelineId] || [];
       branches.push(branchPoint);
-      byTimelineId[branch.timelineId] = branches;
-    });
+      byTimelineId[branchPoint.sourceTimelineId] = branches;
+    }
   });
 
   return byTimelineId;
