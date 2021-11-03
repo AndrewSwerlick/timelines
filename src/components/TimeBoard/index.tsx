@@ -1,53 +1,23 @@
-import React, { useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
-import { useAppSelector, useAppDispatch } from "../../app/hooks";
+import React from "react";
+import { useAppSelector } from "../../app/hooks";
 import { useTimeboardLayout } from "./hooks";
-import {
-  branchTimeline,
-  createNewTimeline,
-  addMoment,
-} from "../../entities/timeline";
 import { ChapterSquare } from "../../components/ChapterSquare";
 import { AddChapterButton } from "../AddChapterButton";
 import { Arrow } from "../../components/graphics/Arrow";
 
-import { getMockTitle } from "../../entities/mocks";
-
 export const TimeBoard: React.FC = () => {
-  const dispatch = useAppDispatch();
-  const timelines = useAppSelector((state) => state.timelines);
-  const moments = useAppSelector((state) => state.moments);
+  const timelines = useAppSelector((state) => state.board.timelines);
+  const moments = useAppSelector((state) => state.board.moments);
 
-  const sourceTimeline = Object.values(timelines.entities)[0];
-  const branchingMoment = useAppSelector((state) => {
-    if (sourceTimeline) {
-      return state.moments.entities[sourceTimeline?.momentIds[3]];
-    }
-  });
   const layout = useTimeboardLayout({
     momentSize: 120,
     horizontalSpacing: 120,
     verticalSpacing: 120,
   });
 
-  function setupTimeline() {
-    const timelineId = uuidv4();
-    dispatch(createNewTimeline({ id: timelineId }));
-    [...Array(5)].forEach((_, index) => {
-      const momentId = uuidv4();
-      setTimeout(() => {
-        dispatch(addMoment({ timelineId, momentId, title: getMockTitle() }));
-      }, index * 500);
-    });
-  }
-
-  useEffect(() => {
-    setupTimeline();
-  }, []);
-
   const currentTimeline = Object.values(timelines.entities)[0];
-  const maxX = Math.max(...Object.entries(layout).map(([_, { x }]) => x));
-  const maxY = Math.max(...Object.entries(layout).map(([_, { y }]) => y));
+  const maxX = Math.max(0, ...Object.entries(layout).map(([_, { x }]) => x));
+  const maxY = Math.max(0, ...Object.entries(layout).map(([_, { y }]) => y));
 
   return (
     <svg
@@ -57,8 +27,9 @@ export const TimeBoard: React.FC = () => {
     >
       {Object.entries(layout)
         .sort(([_, { visible }]) => (!visible ? -1 : 1))
-        .map(([id, { x, y, next, visible }]) => {
+        .map(([id, { x, y, next, visible, timelineId }]) => {
           const moment = moments.entities[id]!;
+          const timeline = timelines.entities[timelineId]!;
           return (
             <g data-momentId={id} key={id}>
               <ChapterSquare
@@ -67,6 +38,7 @@ export const TimeBoard: React.FC = () => {
                 size={120}
                 moment={moment}
                 visible={visible}
+                timeline={timeline}
               />
               {layout[next] && (
                 <Arrow

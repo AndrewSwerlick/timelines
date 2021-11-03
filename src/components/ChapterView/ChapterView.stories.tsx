@@ -12,7 +12,7 @@ const demoMoment: Moment = {
     id: uuidv4(),
     parentId: uuidv4(),
     featIds: [],
-    narrative: "Johnny went to the store",
+    events: ["Johnny went to the store"],
     title: "The one with the tiny birds",
     timelineId: uuidv4(),
 }
@@ -23,6 +23,5 @@ const Template: ComponentStory<typeof ChapterView> = (args) => (
 
 export const Overview = Template.bind({});
 Overview.args = {
-  moment: demoMoment,
-  close: () => {},
+  useCurrentMoment: () => demoMoment,
 };

@@ -29,6 +29,16 @@ interface EditMomentAction {
   narrative: string;
 }
 
+interface RemoveMomentAction {
+  momentId: string;
+  timelineId: string;
+}
+
+interface AddEventAction {
+  momentId: string;
+  text: string;
+}
+
 export const timelineSlice = createSlice({
   name: "timeline",
   initialState: {
@@ -62,13 +72,17 @@ export const timelineSlice = createSlice({
         ).concat([newBranchMomentPartial.id, newMomentPartial.id]),
       };
       timelineAdapter.addOne(state.timelines, timeline);
-      const newBranchMoment = {
+      const newBranchMoment: Moment = {
         ...newBranchMomentPartial,
         timelineId: timeline.id,
+        featIds: [],
+        events: [],
       };
-      const newMoment = {
+      const newMoment: Moment = {
         ...newMomentPartial,
         timelineId: timeline.id,
+        featIds: [],
+        events: [],
       };
       momentAdapter.addMany(state.moments, [newBranchMoment, newMoment]);
 
@@ -111,6 +125,8 @@ export const timelineSlice = createSlice({
         id: action.payload.momentId,
         timelineId: action.payload.timelineId,
         title: action.payload.title,
+        featIds: [],
+        events: [],
       });
       const { timelineId } = action.payload;
       const newMoments = [
@@ -122,11 +138,28 @@ export const timelineSlice = createSlice({
         changes: { momentIds: newMoments },
       });
     },
-    editMoment: (state, action: PayloadAction<EditMomentAction>) => {
+    editMoment(state, action: PayloadAction<EditMomentAction>) {
       const { title, narrative, momentId } = action.payload;
       momentAdapter.updateOne(state.moments, {
         id: momentId,
         changes: { title, narrative },
+      });
+    },
+    removeMoment(state, action: PayloadAction<RemoveMomentAction>) {
+      const { momentId, timelineId } = action.payload;
+      const currentMoments = state.timelines.entities[timelineId]?.momentIds;
+      const newMoments = currentMoments?.filter((id) => id !== momentId);
+      timelineAdapter.updateOne(state.timelines, {
+        id: timelineId,
+        changes: { momentIds: newMoments },
+      });
+    },
+    addEvent(state, action: PayloadAction<AddEventAction>) {
+      const { momentId, text } = action.payload;
+      const existingEvents = state.moments.entities[momentId]?.events || [];
+      momentAdapter.updateOne(state.moments, {
+        id: momentId,
+        changes: { events: existingEvents.concat(text) },
       });
     },
   },
@@ -137,12 +170,14 @@ export const {
   branchTimeline,
   addMoment,
   editMoment,
+  addEvent,
+  removeMoment,
 } = timelineSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const getBranchPointsByTimelineId = (state: RootState) => {
   const byTimelineId: { [index: string]: BranchPoint[] } = {};
-  Object.values(state.branchPoints.entities).forEach((branchPoint) => {
+  Object.values(state.board.branchPoints.entities).forEach((branchPoint) => {
     if (branchPoint) {
       const branches = byTimelineId[branchPoint.sourceTimelineId] || [];
       branches.push(branchPoint);
@@ -154,10 +189,10 @@ export const getBranchPointsByTimelineId = (state: RootState) => {
 };
 
 export const getCurrentTimeline = (state: RootState) => {
-  if (state.ui.currentTimelineId) {
-    return state.timelines.entities[state.ui.currentTimelineId];
-  } else if (state.timelines.ids.length > 0) {
-    return state.timelines.entities[state.timelines.ids[0]];
+  if (state.board.ui.currentTimelineId) {
+    return state.board.timelines.entities[state.board.ui.currentTimelineId];
+  } else if (state.board.timelines.ids.length > 0) {
+    return state.board.timelines.entities[state.board.timelines.ids[0]];
   }
 };
 

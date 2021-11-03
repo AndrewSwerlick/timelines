@@ -19,10 +19,12 @@
     "@types/styled-components": "^5.1.13",
     "@types/uuid": "^8.3.1",
     "@visx/text": "^2.1.0",
+    "addon-redux": "^2.0.9",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.0",
+    "react-router-dom": "^5.3.0",
     "react-scripts": "4.0.3",
     "react-timing-hooks": "^2.0.0",
     "roughjs": "^4.4.1",
@@ -34,10 +36,22 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public"
   },
   "eslintConfig": {
-    "extends": "react-app"
+    "extends": "react-app",
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
   },
   "browserslist": {
     "production": [
@@ -50,5 +64,16 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@storybook/addon-actions": "^6.3.12",
+    "@storybook/addon-essentials": "^6.3.12",
+    "@storybook/addon-links": "^6.3.12",
+    "@storybook/node-logger": "^6.3.12",
+    "@storybook/preset-create-react-app": "^3.2.0",
+    "@storybook/react": "^6.3.12",
+    "@types/react-router-dom": "^5.3.1",
+    "@types/redux-localstorage": "^1.0.8",
+    "babel-loader": "8.1.0"
   }
 }

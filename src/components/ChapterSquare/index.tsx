@@ -1,25 +1,14 @@
 import React from "react";
 import { Text } from "@visx/text";
-import { Dialog } from "@reach/dialog";
-import styled from "styled-components";
 import "@reach/dialog/styles.css";
 import { v4 as uuidv4 } from "uuid";
+import { useHistory } from "react-router-dom";
 import { Pencil } from "../graphics/Pencil";
 import { Square } from "../graphics/Square";
-import { CirclePlus } from "../graphics/CirclePlus";
+import { CirclePlus, CircleMinus } from "../graphics/CirclePlus";
 import { useAppDispatch } from "../../app/hooks";
-import { Moment } from "../../entities/data";
-import { ChapterView } from "../ChapterView";
-import { branchTimeline } from "../../entities/timeline";
-
-const Editor = styled(Dialog)`
-  border-radius: 15px 5px 5px 25px/5px 25px 25px 5px;
-  border: 2px solid #333;
-  min-height: 400px;
-  padding: 1em;
-  display: flex;
-  flex-direction: column;
-`;
+import { Moment, Timeline } from "../../entities/data";
+import { branchTimeline, removeMoment } from "../../entities/timeline";
 
 export const ChapterSquare: React.FC<{
   x: number;
@@ -27,10 +16,12 @@ export const ChapterSquare: React.FC<{
   size: number;
   moment: Moment;
   visible: boolean;
-}> = ({ x, y, size = 50, moment, visible }) => {
-  const [showDialog, setShowDialog] = React.useState(false);
-  const open = () => setShowDialog(true);
-  const close = () => setShowDialog(false);
+  timeline: Timeline;
+}> = ({ x, y, size = 50, moment, visible, timeline }) => {
+  const history = useHistory();
+  const open = () => {
+    history.push(`/chapter/${moment.id}`);
+  };
   const dispatch = useAppDispatch();
 
   return (
@@ -47,7 +38,7 @@ export const ChapterSquare: React.FC<{
         >
           {moment.title}
         </Text>
-        <Pencil x={80} y={10} size={10} />
+        <Pencil x={10} y={10} size={10} />
         <rect
           x={0}
           y={0}
@@ -59,24 +50,36 @@ export const ChapterSquare: React.FC<{
           style={{ cursor: "pointer" }}
         />
         {visible && (
-          <CirclePlus
-            x={35}
-            y={100}
-            size={30}
-            onClick={() => {
-              dispatch(
-                branchTimeline({
-                  newTimelineId: uuidv4(),
-                  branchingMoment: moment,
-                })
-              );
-            }}
-          />
+          <>
+            <CirclePlus
+              x={35}
+              y={100}
+              size={30}
+              onClick={() => {
+                dispatch(
+                  branchTimeline({
+                    newTimelineId: uuidv4(),
+                    branchingMoment: moment,
+                  })
+                );
+              }}
+            />
+            <CircleMinus
+              x={85}
+              y={100}
+              size={30}
+              onClick={() => {
+                dispatch(
+                  removeMoment({
+                    timelineId: timeline.id,
+                    momentId: moment.id,
+                  })
+                );
+              }}
+            />
+          </>
         )}
       </Square>
-      <Editor isOpen={showDialog} onDismiss={close}>
-        <ChapterView close={close} moment={moment} />
-      </Editor>
     </>
   );
 };

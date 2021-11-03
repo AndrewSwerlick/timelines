@@ -1,4 +1,7 @@
 import _ from "lodash";
+import { store } from "../app/store";
+import { v4 as uuidv4 } from "uuid";
+import { createNewTimeline, addMoment } from "../entities/timeline";
 
 const mockTitles = [
   "The One with the Sonogram at the End",
@@ -24,6 +27,17 @@ const mockTitles = [
   "The One with the Birth",
   "The One Where Rachel Finds Out",
 ];
+
+export const setupMockTimeline = (dispatch: (typeof store.dispatch)) => {
+  const timelineId = uuidv4();
+  dispatch(createNewTimeline({ id: timelineId }));
+  [...Array(5)].forEach((_, index) => {
+    const momentId = uuidv4();
+    setTimeout(() => {
+      dispatch(addMoment({ timelineId, momentId, title: getMockTitle() }));
+    }, index * 500);
+  });
+};
 
 export const getMockTitle = () => {
   return _.sample(mockTitles)!;

@@ -4,7 +4,13 @@ import { useAppSelector } from "../../app/hooks";
 import _ from "lodash";
 
 interface TimeBoardLayout {
-  [index: string]: { x: number; y: number; next: string; visible: boolean };
+  [index: string]: {
+    x: number;
+    y: number;
+    next: string;
+    visible: boolean;
+    timelineId: string;
+  };
 }
 
 interface TimeBoardLayoutOptions {
@@ -19,7 +25,7 @@ export const useTimeboardLayout = ({
   verticalSpacing,
 }: TimeBoardLayoutOptions) => {
   const layout: TimeBoardLayout = {};
-  const timelines = useAppSelector((state) => state.timelines);
+  const timelines = useAppSelector((state) => state.board.timelines);
   const branchPointsByTimelineId = useAppSelector(getBranchPointsByTimelineId);
   let rows = 0;
 
@@ -54,6 +60,7 @@ export const useTimeboardLayout = ({
             y: basePosition.y - 10 * (index + 1),
             next: branchTimeline?.momentIds[timelineOrder + 1],
             visible: false,
+            timelineId: branchTimeline.id,
           };
         }
         const branchTimeline = timelines.entities[branch.timelineId]!;
@@ -76,6 +83,7 @@ export const useTimeboardLayout = ({
           y: rows * (momentSize + verticalSpacing),
           next: timeline.momentIds[index + 1],
           visible: true,
+          timelineId: timeline.id,
         };
       }
     });

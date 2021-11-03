@@ -1,14 +1,21 @@
 import React from "react";
-import logo from "./logo.svg";
+import { Switch, Route } from "react-router-dom";
 import { TimeBoard } from "./components/TimeBoard";
-import "./App.css";
+import { ChapterView } from "./components/ChapterView";
 
-function App() {
+const App: React.FC = () => {
   return (
     <div className="App">
-      <TimeBoard />
+      <Switch>
+        <Route path="/chapter/:id">
+          <ChapterView />
+        </Route>
+        <Route path="/">
+          <TimeBoard />
+        </Route>
+      </Switch>
     </div>
   );
-}
+};
 
 export default App;

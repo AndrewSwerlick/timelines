@@ -9,7 +9,7 @@ export const AddChapterButton: React.FC = () => {
 
   const newChapterButtonPosition = currentTimeline
     ? {
-        x: currentTimeline.momentIds.length * 240 - 120,
+        x: Math.max(currentTimeline.momentIds.length * 240 - 120, 120),
         y: 0,
       }
     : { x: 0, y: 0 };

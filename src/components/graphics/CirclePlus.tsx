@@ -1,7 +1,21 @@
 import React from "react";
 import { Graphic } from "./data";
 
-export const CirclePlus: React.FC<Graphic> = ({ x, y, size, onClick }) => {
+export const CirclePlus: React.FC<Graphic> = (props) => {
+  return <CircleButton {...props} character="+" />;
+};
+
+export const CircleMinus: React.FC<Graphic> = (props) => {
+  return <CircleButton {...props} character="-" />;
+};
+
+export const CircleButton: React.FC<Graphic & { character: string }> = ({
+  x,
+  y,
+  size,
+  onClick,
+  character,
+}) => {
   return (
     <svg
       version="1.1"
@@ -31,7 +45,7 @@ export const CirclePlus: React.FC<Graphic> = ({ x, y, size, onClick }) => {
           style={{ whiteSpace: "pre" }}
           direction="ltr"
         >
-          +
+          {character}
         </text>
       </g>
       <rect

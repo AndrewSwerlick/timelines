@@ -2,10 +2,12 @@ import React from "react";
 import "@reach/dialog/styles.css";
 import VisuallyHidden from "@reach/visually-hidden";
 import styled from "styled-components";
+import { Link, useParams } from "react-router-dom";
 import { useIdleCallback } from "react-timing-hooks";
+import { editMoment, addEvent } from "../../entities/timeline";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { EnterArrow } from "../graphics/EnterArrow";
 import { Moment } from "../../entities/data";
-import { editMoment } from "../../entities/timeline";
-import { useAppDispatch } from "../../app/hooks";
 
 const Header = styled.div`
   display: flex;
@@ -27,7 +29,7 @@ const ChapterTitle = styled.input`
   margin: 0;
 `;
 
-const CloseButton = styled.button`
+const CloseButton = styled(Link)`
   box-sizing: content-box;
   width: 1em;
   height: 1em;
@@ -41,12 +43,35 @@ const CloseButton = styled.button`
   opacity: 1;
 `;
 
-const TextArea = styled.textarea`
+const EventItem = styled.div`
+  flex: 1 1 100%;
   font-family: "Gloria Hallelujah", cursive;
-  border: none;
+`;
+
+const EventInput = styled.div`
   width: 100%;
   flex: 1;
+  display: flex;
+  flex-wrap: wrap;
   resize: none;
+  border-width: 2px;
+  border-style: solid;
+  border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
+  box-sizing: border-box;
+`;
+
+const TextArea = styled.textarea`
+  font-family: "Gloria Hallelujah", cursive;
+  flex: 1 1 auto;
+  border: none;
+`;
+
+const Submit = styled.button`
+  font-family: "Gloria Hallelujah", cursive;
+  flex: 0 0 80px;
+  border: 0 0 0 2px;
+  border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
+  background-color: white;
 `;
 
 const Flex = styled.div`
@@ -55,10 +80,38 @@ const Flex = styled.div`
   flex: 1;
 `;
 
-export const ChapterView: React.FC<{
-  close: () => void;
-  moment: Moment;
-}> = ({ moment, close }) => {
+const Toolbar = styled.ul`
+  border-bottom: 2px solid #333;
+  display: flex;
+  padding: 0px;
+`;
+
+const Tool = styled.li`
+  font-family: "Gloria Hallelujah", cursive;
+  list-style: none;
+  flex: 0 1 auto;
+  margin: 0 10px 0 0;
+  border: 1px solid black;
+  padding: 8px;
+  border-radius: 25px;
+  cursor: pointer;
+`;
+
+const useCurrentMomentRedux = () => {
+  const { id } = useParams<{ id?: string }>();
+  const moment = useAppSelector((state) => state.board.moments.entities[id!])!;
+  return moment;
+};
+
+interface Props {
+  useCurrentMoment?: () => Moment;
+}
+
+export const ChapterView: React.FC<Props> = ({
+  useCurrentMoment = useCurrentMomentRedux,
+}) => {
+  const moment = useCurrentMoment();
+
   const dispatch = useAppDispatch();
   const saveChanges = useIdleCallback(
     ({ title, narrative }: { title: string; narrative: string }) => {
@@ -80,20 +133,42 @@ export const ChapterView: React.FC<{
               })
             }
           />
-          <CloseButton onClick={close}>
+          <CloseButton to="/">
             <VisuallyHidden>Close</VisuallyHidden>
             <span aria-hidden>×</span>
           </CloseButton>
         </Header>
-        <TextArea
-          value={moment.narrative}
-          onChange={(e) =>
-            saveChanges({
-              title: moment.title || "",
-              narrative: e.target.value,
-            })
-          }
-        />
+        <Toolbar>
+          <Tool>Perform Feat</Tool>
+          <Tool>Create Savepoint</Tool>
+        </Toolbar>
+        <>
+          {moment.events.map((m) => {
+            return <EventItem>{m}</EventItem>;
+          })}
+        </>
+        <EventInput>
+          <TextArea
+            value={moment.narrative}
+            onChange={(e) =>
+              saveChanges({
+                title: moment.title || "",
+                narrative: e.target.value,
+              })
+            }
+          />
+          <Submit
+            type="submit"
+            onClick={() =>
+              moment.narrative &&
+              dispatch(
+                addEvent({ momentId: moment.id, text: moment.narrative })
+              )
+            }
+          >
+            <EnterArrow x={0} y={0} size={30} />
+          </Submit>
+        </EventInput>
       </Flex>
     </>
   );
