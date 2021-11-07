@@ -4,7 +4,6 @@ import {
   PayloadAction,
   createAsyncThunk,
 } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
 import { Feat } from "./data";
 import type { RootState } from "../app/store";
@@ -32,4 +31,12 @@ const completeFeat = createAsyncThunk<
     cardId,
     featId,
   };
+});
+
+export const featsSlice = createSlice({
+  name: "feats",
+  initialState: featAdapter.getInitialState(),
+  reducers: {
+    attemptFeat(feats, action: PayloadAction<AttemptFeatAction>) {},
+  },
 });

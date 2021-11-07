@@ -2,12 +2,10 @@ import {
   createSlice,
   createEntityAdapter,
   PayloadAction,
-  createAsyncThunk,
 } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
 import _ from "lodash";
-import { Feat, Card } from "./data";
-import type { RootState } from "../app/store";
+import { Card } from "./data";
 
 type CardTemplate = {
   description: string;
@@ -117,7 +115,7 @@ function createFortunes(): Deck {
 }
 
 function createFailures(): Deck {
-    return createDeck('failure',[
+  return createDeck("failure", [
     { description: "You fail and one character dies", tier: 1, count: 2 },
     {
       description: "You fail and as a result permanently fail one objective",

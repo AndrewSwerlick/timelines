@@ -26,7 +26,6 @@ interface AddMomentAction {
 interface EditMomentAction {
   momentId: string;
   title: string;
-  narrative: string;
 }
 
 interface RemoveMomentAction {
@@ -139,10 +138,10 @@ export const timelineSlice = createSlice({
       });
     },
     editMoment(state, action: PayloadAction<EditMomentAction>) {
-      const { title, narrative, momentId } = action.payload;
+      const { title, momentId } = action.payload;
       momentAdapter.updateOne(state.moments, {
         id: momentId,
-        changes: { title, narrative },
+        changes: { title },
       });
     },
     removeMoment(state, action: PayloadAction<RemoveMomentAction>) {

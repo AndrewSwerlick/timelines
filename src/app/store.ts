@@ -4,8 +4,6 @@ import {
   Action,
   EntityState,
   combineReducers,
-  compose,
-  StoreEnhancer,
 } from "@reduxjs/toolkit";
 import { enhancer } from "addon-redux";
 import timelineReducer from "../entities/timeline";

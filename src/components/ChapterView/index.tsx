@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import "@reach/dialog/styles.css";
 import VisuallyHidden from "@reach/visually-hidden";
 import styled from "styled-components";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useIdleCallback } from "react-timing-hooks";
 import { editMoment, addEvent } from "../../entities/timeline";
-import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
 import { EnterArrow } from "../graphics/EnterArrow";
+import { FeatInput } from "../FeatInput";
 import { Moment } from "../../entities/data";
 
 const Header = styled.div`
@@ -83,45 +84,77 @@ const Flex = styled.div`
 const Toolbar = styled.ul`
   border-bottom: 2px solid #333;
   display: flex;
-  padding: 0px;
+  padding: 10px 0px;
+  margin: 0;
 `;
 
-const Tool = styled.li`
+const Tool = styled("li")<{ active: boolean }>`
+  border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
   font-family: "Gloria Hallelujah", cursive;
   list-style: none;
   flex: 0 1 auto;
   margin: 0 10px 0 0;
   border: 1px solid black;
   padding: 8px;
-  border-radius: 25px;
   cursor: pointer;
+  ${(props) => `
+      background-color: ${props.active ? "#2b2b2b" : "white"};
+      color: ${props.active ? "white" : "black"};
+      `}
 `;
 
-const useCurrentMomentRedux = () => {
-  const { id } = useParams<{ id?: string }>();
-  const moment = useAppSelector((state) => state.board.moments.entities[id!])!;
-  return moment;
+const GenericInput: React.FC = () => {
+  const moment = useCurrentMomentRedux();
+  const [text, setText] = useState("");
+  const saveChanges = useIdleCallback(({ newText }: { newText: string }) => {
+    if (text !== newText) {
+      setText(newText);
+    }
+  });
+  const dispatch = useAppDispatch();
+  return (
+    <>
+      <TextArea
+        onChange={(e) =>
+          saveChanges({
+            newText: e.target.value,
+          })
+        }
+      />
+      <Submit
+        type="submit"
+        onClick={() =>
+          text && dispatch(addEvent({ momentId: moment.id, text }))
+        }
+      >
+        <EnterArrow x={0} y={0} size={30} />
+      </Submit>
+    </>
+  );
 };
 
 interface Props {
   useCurrentMoment?: () => Moment;
 }
 
+const Container = styled.div`
+  margin: 0 32px;
+`;
+
 export const ChapterView: React.FC<Props> = ({
   useCurrentMoment = useCurrentMomentRedux,
 }) => {
+  const [inputType, setInputType] = useState("text");
   const moment = useCurrentMoment();
 
   const dispatch = useAppDispatch();
-  const saveChanges = useIdleCallback(
-    ({ title, narrative }: { title: string; narrative: string }) => {
-      if (moment.narrative !== narrative || moment.title !== title) {
-        dispatch(editMoment({ momentId: moment.id, narrative, title }));
-      }
+  const saveChanges = useIdleCallback(({ title }: { title: string }) => {
+    if (moment.title !== title) {
+      dispatch(editMoment({ momentId: moment.id, title }));
     }
-  );
+  });
   return (
-    <>
+    <Container>
       <Flex>
         <Header>
           <ChapterTitle
@@ -129,7 +162,6 @@ export const ChapterView: React.FC<Props> = ({
             onChange={(e) =>
               saveChanges({
                 title: e.target.value,
-                narrative: moment.narrative || "",
               })
             }
           />
@@ -139,37 +171,36 @@ export const ChapterView: React.FC<Props> = ({
           </CloseButton>
         </Header>
         <Toolbar>
-          <Tool>Perform Feat</Tool>
-          <Tool>Create Savepoint</Tool>
+          <Tool
+            active={inputType == "text"}
+            onClick={() => {
+              setInputType("text");
+            }}
+          >
+            Add Event
+          </Tool>
+          <Tool
+            active={inputType == "feat"}
+            onClick={() => {
+              setInputType("feat");
+            }}
+          >
+            Perform Feat
+          </Tool>
+          <Tool active={false}>Create Savepoint</Tool>
         </Toolbar>
         <>
           {moment.events.map((m) => {
             return <EventItem>{m}</EventItem>;
           })}
         </>
-        <EventInput>
-          <TextArea
-            value={moment.narrative}
-            onChange={(e) =>
-              saveChanges({
-                title: moment.title || "",
-                narrative: e.target.value,
-              })
-            }
-          />
-          <Submit
-            type="submit"
-            onClick={() =>
-              moment.narrative &&
-              dispatch(
-                addEvent({ momentId: moment.id, text: moment.narrative })
-              )
-            }
-          >
-            <EnterArrow x={0} y={0} size={30} />
-          </Submit>
-        </EventInput>
+        {inputType == "text" && (
+          <EventInput>
+            <GenericInput />
+          </EventInput>
+        )}
+        {inputType == "feat" && <FeatInput />}
       </Flex>
-    </>
+    </Container>
   );
 };
