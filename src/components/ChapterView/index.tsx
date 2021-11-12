@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "@reach/dialog/styles.css";
 import VisuallyHidden from "@reach/visually-hidden";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
-import { useIdleCallback } from "react-timing-hooks";
 import { editMoment, addEvent } from "../../entities/timeline";
 import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
 import { EnterArrow } from "../graphics/EnterArrow";
@@ -106,11 +105,11 @@ const Tool = styled("li")<{ active: boolean }>`
 const GenericInput: React.FC = () => {
   const moment = useCurrentMomentRedux();
   const [text, setText] = useState("");
-  const saveChanges = useIdleCallback(({ newText }: { newText: string }) => {
+  const saveChanges = ({ newText }: { newText: string }) => {
     if (text !== newText) {
       setText(newText);
     }
-  });
+  };
   const dispatch = useAppDispatch();
   return (
     <>
@@ -148,11 +147,11 @@ export const ChapterView: React.FC<Props> = ({
   const moment = useCurrentMoment();
 
   const dispatch = useAppDispatch();
-  const saveChanges = useIdleCallback(({ title }: { title: string }) => {
+  const saveChanges = ({ title }: { title: string }) => {
     if (moment.title !== title) {
       dispatch(editMoment({ momentId: moment.id, title }));
     }
-  });
+  };
   return (
     <Container>
       <Flex>

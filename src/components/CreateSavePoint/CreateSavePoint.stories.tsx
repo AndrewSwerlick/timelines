@@ -1,13 +1,12 @@
-import { FeatInput } from "./index";
+import { CreateSavePoint } from "./index";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { Moment } from "../../entities/data";
 import { v4 as uuidv4 } from "uuid";
-import styled from "@emotion/styled";
 
 export default {
-  title: "Feat Input",
-  component: FeatInput,
-} as ComponentMeta<typeof FeatInput>;
+  title: "Create Save Point",
+  component: CreateSavePoint,
+} as ComponentMeta<typeof CreateSavePoint>;
 
 const demoMoment: Moment = {
   id: uuidv4(),
@@ -18,12 +17,8 @@ const demoMoment: Moment = {
   timelineId: uuidv4(),
 };
 
-const Container = styled.div`
-  display: flex;
-`;
-
-const Template: ComponentStory<typeof FeatInput> = (args) => (
-  <FeatInput {...args} />
+const Template: ComponentStory<typeof CreateSavePoint> = (args) => (
+  <CreateSavePoint {...args} />
 );
 
 export const Overview = Template.bind({});

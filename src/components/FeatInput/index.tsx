@@ -1,6 +1,6 @@
 import React from "react";
 import "@reach/dialog/styles.css";
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
 import { Moment } from "../../entities/data";
 

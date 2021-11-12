@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { useChannel, useParameter } from "@storybook/api";
 import { MemoryRouter } from "react-router-dom";
+import { ThemeProvider } from "theme-ui";
+import { theme } from "../src/app/theme.ts";
 import { store } from "../src/app/store";
 
 export const parameters = {
@@ -24,4 +26,5 @@ export const decorators = [
     return Story();
   },
   (Story) => <MemoryRouter initialEntries={["/"]}>{Story()}</MemoryRouter>,
+  (Story, context) => <ThemeProvider theme={theme}>{Story()}</ThemeProvider>,
 ];
