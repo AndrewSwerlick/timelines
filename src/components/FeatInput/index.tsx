@@ -1,70 +1,15 @@
-import React from "react";
+import React, { ChangeEvent, useState } from "react";
 import "@reach/dialog/styles.css";
 import styled from "@emotion/styled";
+import { Select, Text, Flex, Input } from "theme-ui";
 import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
-import { Moment } from "../../entities/data";
+import { Feat, Moment } from "../../entities/data";
+import { completeFeat, FeatDetails } from "../../entities/feats";
 
 const Inputs = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex: 1 1 auto;
-`;
-
-const Container = styled.div`
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  resize: none;
-  border-width: 2px;
-  border-style: solid;
-  border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
-  box-sizing: border-box;
-  padding: 8px 32px 8px 8px;
-`;
-
-const SketchySelect = styled.select`
-  font-family: "Gloria Hallelujah", cursive;
-  display: block;
-  width: 100%;
-  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
-  -moz-padding-start: calc(0.75rem - 3px);
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.5;
-  color: #212529;
-  background-color: #fff;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 16px 12px;
-  border: 2px solid #333;
-  border-radius: 55px 225px 15px 25px/25px 25px 35px 355px;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  appearance: none;
-  &:invalid {
-    color: gray;
-  }
-  flex: 0 0 150px;
-  margin: 0 8px 0 0;
-`;
-
-const NumberInput = styled.input`
-  border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
-  display: block;
-  width: 50px;
-  padding: 0.375rem 0.75rem;
-  font-size: 1rem;
-  font-weight: 700;
-  line-height: 1.5;
-  color: #212529;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 2px solid #333;
-  appearance: none;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  flex: 0 0 40px;
-  margin: 0 8px;
 `;
 
 const DescriptionInput = styled.input`
@@ -106,9 +51,11 @@ const Succeed = styled.button`
   margin-top: 8px;
 `;
 
-const FeatType: React.FC = () => {
+const FeatType: React.FC<{
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+}> = ({ onChange }) => {
   return (
-    <SketchySelect required>
+    <Select onChange={onChange} mr={2} variant="sketchySelect" required>
       <>
         <option value="" disabled selected hidden>
           Feat Type
@@ -117,7 +64,24 @@ const FeatType: React.FC = () => {
           <option>{option}</option>
         ))}
       </>
-    </SketchySelect>
+    </Select>
+  );
+};
+
+const CharacterType: React.FC<{
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+}> = ({ onChange }) => {
+  return (
+    <Select onChange={onChange} mx={4} variant="sketchySelect" required>
+      <>
+        <option value="" disabled selected hidden>
+          Character
+        </option>
+        {["solider", "scholar", "snake", "shadow"].map((option) => (
+          <option>{option}</option>
+        ))}
+      </>
+    </Select>
   );
 };
 
@@ -125,24 +89,91 @@ interface Props {
   useCurrentMoment?: () => Moment;
 }
 
+function isFeatDetails(
+  inputs: Partial<FeatDetails> | FeatDetails
+): inputs is FeatDetails {
+  return inputs.featType !== undefined;
+}
 export const FeatInput: React.FC<Props> = ({
   useCurrentMoment = useCurrentMomentRedux,
 }) => {
   const moment = useCurrentMoment();
   const dispatch = useAppDispatch();
+  const [inputs, setInputs] = useState<Partial<FeatDetails> | FeatDetails>({
+    momentId: moment.id,
+  });
 
   return (
-    <Container>
+    <Flex
+      sx={{
+        width: "100%",
+        flex: "1",
+        display: "flex",
+        flexWrap: "wrap",
+        resize: "none",
+        borderWidth: "2px",
+        borderStyle: "solid",
+        borderRadius: "25px 25px 55px 5px/5px 55px 25px 25px",
+        boxSizing: "border-box",
+        padding: "8px 32px 8px 8px",
+      }}
+    >
       <Inputs>
-        <FeatType />
-        <NumberInput />
-        <NumberInput />
-        <DescriptionInput />
+        <FeatType
+          onChange={(e) =>
+            setInputs({
+              ...inputs,
+              featType: e.currentTarget.value as FeatDetails["featType"],
+            })
+          }
+        />
+        <CharacterType
+          onChange={(e) =>
+            setInputs({
+              ...inputs,
+              characterRole: e.currentTarget
+                .value as FeatDetails["characterRole"],
+            })
+          }
+        />
+        <Flex sx={{ flex: "0 0 100px", alignItems: "center" }}>
+          <Text>Roll</Text>
+          <Input
+            sx={{ flex: "0 0 40px", margin: 2, variant: "sketchyInput" }}
+            onChange={(e) =>
+              setInputs({
+                ...inputs,
+                roll: parseInt(e.currentTarget.value),
+              })
+            }
+          />
+        </Flex>
+        <DescriptionInput
+          onChange={(e) =>
+            setInputs({
+              ...inputs,
+              description: e.currentTarget.value,
+            })
+          }
+        />
       </Inputs>
       <SubmitButtons>
-        <Fail>Fail</Fail>
+        <Fail
+          onClick={() => {
+            const details: FeatDetails | Partial<FeatDetails> = {
+              ...inputs,
+              result: "failure",
+            };
+            debugger;
+            if (isFeatDetails(details)) {
+              dispatch(completeFeat(details));
+            }
+          }}
+        >
+          Fail
+        </Fail>
         <Succeed>Succeed</Succeed>
       </SubmitButtons>
-    </Container>
+    </Flex>
   );
 };

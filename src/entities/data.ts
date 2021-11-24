@@ -1,3 +1,5 @@
+import { EntityId } from "@reduxjs/toolkit";
+
 export interface Timeline {
   id: string;
   momentIds: string[];
@@ -33,12 +35,12 @@ export interface Card {
 }
 
 export interface Feat {
-  card_id?: string;
+  id: string;
+  cardId: EntityId;
   featType: "knowledge" | "cunning" | "stealth" | "strength";
-  description: "string";
-  result?: "success" | "failure";
-  roll?: number;
-  bonsus?: number;
+  description: string;
+  result: "success" | "failure";
+  roll: number;
   characterRole: "scholar" | "solider" | "snake" | "shadow";
 }
 

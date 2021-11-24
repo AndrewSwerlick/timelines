@@ -32,6 +32,8 @@ export const cardsSlice = createSlice({
   },
 });
 
+export const { drawCard } = cardsSlice.actions;
+
 function createDeck(
   deck: "fortune" | "failure",
   templates: CardTemplate[]

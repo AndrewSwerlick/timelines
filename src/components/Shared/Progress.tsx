@@ -4,7 +4,7 @@ import { Box } from "theme-ui";
 import * as CSS from 'csstype'
 
 interface Props {
-  color: CSS.Property.Color;
+  color: CSS.Color;
   progress: number;
 }
 

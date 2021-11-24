@@ -1,5 +1,5 @@
 /** @jsxImportSource theme-ui */
-
+import React from "react";
 import { Flex, Button } from "theme-ui";
 import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
 import { Moment } from "../../entities/data";
@@ -28,7 +28,7 @@ export const CreateSavePoint: React.FC<Props> = ({
         <div> Remaining save points: 5</div>
         <Button variant="primary">Create Save Point</Button>
       </Flex>
-      <Flex sx={{ flexDirection: "column", justifyContent: 'center' }}>
+      <Flex sx={{ flexDirection: "column", justifyContent: "center" }}>
         <div>Temporal Gateway Instability </div>
         <Progress color="pass" progress={30} />
       </Flex>

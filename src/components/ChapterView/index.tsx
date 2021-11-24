@@ -1,33 +1,16 @@
+/** @jsxImportSource theme-ui */
+
 import React, { useState } from "react";
-import "@reach/dialog/styles.css";
 import VisuallyHidden from "@reach/visually-hidden";
 import styled from "@emotion/styled";
 import { Link } from "react-router-dom";
 import { editMoment, addEvent } from "../../entities/timeline";
+import { Flex, Input, Container, Textarea, Button } from "theme-ui";
 import { useAppDispatch, useCurrentMomentRedux } from "../../app/hooks";
 import { EnterArrow } from "../graphics/EnterArrow";
 import { FeatInput } from "../FeatInput";
 import { Moment } from "../../entities/data";
-
-const Header = styled.div`
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.5rem;
-  border-bottom: 2px solid #333;
-  border-top-left-radius: 33px;
-  border-top-right-radius: 33px;
-`;
-
-const ChapterTitle = styled.input`
-  font-family: "Gloria Hallelujah", cursive;
-  font-size: 1.25rem;
-  font-weight: 500;
-  width: 100%;
-  border: none;
-  margin: 0;
-`;
+import { CreateSavePoint } from "../CreateSavePoint";
 
 const CloseButton = styled(Link)`
   box-sizing: content-box;
@@ -43,64 +26,25 @@ const CloseButton = styled(Link)`
   opacity: 1;
 `;
 
-const EventItem = styled.div`
-  flex: 1 1 100%;
-  font-family: "Gloria Hallelujah", cursive;
-`;
-
-const EventInput = styled.div`
-  width: 100%;
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  resize: none;
-  border-width: 2px;
-  border-style: solid;
-  border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
-  box-sizing: border-box;
-`;
-
-const TextArea = styled.textarea`
-  font-family: "Gloria Hallelujah", cursive;
-  flex: 1 1 auto;
-  border: none;
-`;
-
-const Submit = styled.button`
-  font-family: "Gloria Hallelujah", cursive;
-  flex: 0 0 80px;
-  border: 0 0 0 2px;
-  border-radius: 25px 25px 55px 5px/5px 55px 25px 25px;
-  background-color: white;
-`;
-
-const Flex = styled.div`
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-`;
-
-const Toolbar = styled.ul`
-  border-bottom: 2px solid #333;
-  display: flex;
-  padding: 10px 0px;
-  margin: 0;
-`;
-
-const Tool = styled("li")<{ active: boolean }>`
-  border-radius: 255px 25px 225px 25px/25px 225px 25px 255px;
-  font-family: "Gloria Hallelujah", cursive;
-  list-style: none;
-  flex: 0 1 auto;
-  margin: 0 10px 0 0;
-  border: 1px solid black;
-  padding: 8px;
-  cursor: pointer;
-  ${(props) => `
-      background-color: ${props.active ? "#2b2b2b" : "white"};
-      color: ${props.active ? "white" : "black"};
-      `}
-`;
+const Tool: React.FC<{
+  active: boolean;
+  onClick: (e: React.MouseEvent) => void;
+}> = ({ active, children, onClick }) => (
+  <Button
+    as="li"
+    role="button"
+    sx={{
+      variant: "styles.borders.sketchSquare",
+      padding: 2,
+      backgroundColor: active ? "highlight" : "background",
+      color: active ? "background" : "text",
+      cursor: "pointer",
+    }}
+    onClick={onClick}
+  >
+    {children}
+  </Button>
+);
 
 const GenericInput: React.FC = () => {
   const moment = useCurrentMomentRedux();
@@ -113,21 +57,28 @@ const GenericInput: React.FC = () => {
   const dispatch = useAppDispatch();
   return (
     <>
-      <TextArea
+      <Textarea
+        variant="nakedInput"
         onChange={(e) =>
           saveChanges({
             newText: e.target.value,
           })
         }
       />
-      <Submit
+      <Button
+        variant="primary"
+        sx={{
+          flex: "0 0 80px",
+          borderRadius: "25px 25px 55px 5px/5px 55px 25px 25px",
+          margin: 0,
+        }}
         type="submit"
         onClick={() =>
           text && dispatch(addEvent({ momentId: moment.id, text }))
         }
       >
         <EnterArrow x={0} y={0} size={30} />
-      </Submit>
+      </Button>
     </>
   );
 };
@@ -135,10 +86,6 @@ const GenericInput: React.FC = () => {
 interface Props {
   useCurrentMoment?: () => Moment;
 }
-
-const Container = styled.div`
-  margin: 0 32px;
-`;
 
 export const ChapterView: React.FC<Props> = ({
   useCurrentMoment = useCurrentMomentRedux,
@@ -153,10 +100,22 @@ export const ChapterView: React.FC<Props> = ({
     }
   };
   return (
-    <Container>
-      <Flex>
-        <Header>
-          <ChapterTitle
+    <Container px={4} my={4}>
+      <Flex sx={{ flexDirection: "column", flex: 1 }}>
+        <Flex
+          sx={{
+            justifyContent: "space-between",
+            p: 2,
+            borderBottom: "2px solid #333",
+          }}
+        >
+          <Input
+            variant="forms.nakedInput"
+            sx={{
+              fontSize: 3,
+              width: "100%",
+              margin: "0",
+            }}
             value={moment.title}
             onChange={(e) =>
               saveChanges({
@@ -166,39 +125,40 @@ export const ChapterView: React.FC<Props> = ({
           />
           <CloseButton to="/">
             <VisuallyHidden>Close</VisuallyHidden>
-            <span aria-hidden>×</span>
           </CloseButton>
-        </Header>
-        <Toolbar>
+        </Flex>
+        <Flex sx={{ borderBottom: "2px solid #333" }}>
           <Tool
             active={inputType == "text"}
-            onClick={() => {
-              setInputType("text");
-            }}
+            onClick={() => setInputType("text")}
           >
             Add Event
           </Tool>
           <Tool
+            onClick={() => setInputType("feat")}
             active={inputType == "feat"}
-            onClick={() => {
-              setInputType("feat");
-            }}
           >
             Perform Feat
           </Tool>
-          <Tool active={false}>Create Savepoint</Tool>
-        </Toolbar>
+          <Tool
+            onClick={() => setInputType("savepoint")}
+            active={inputType == "savepoint"}
+          >
+            Create Savepoint
+          </Tool>
+        </Flex>
         <>
           {moment.events.map((m) => {
-            return <EventItem>{m}</EventItem>;
+            return <Container sx={{ flex: "1 1 100%" }}>{m}</Container>;
           })}
         </>
         {inputType == "text" && (
-          <EventInput>
+          <Flex sx={{ variant: "styles.borders.sketchy" }}>
             <GenericInput />
-          </EventInput>
+          </Flex>
         )}
         {inputType == "feat" && <FeatInput />}
+        {inputType == "savepoint" && <CreateSavePoint />}
       </Flex>
     </Container>
   );

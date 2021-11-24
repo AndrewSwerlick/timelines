@@ -8,7 +8,9 @@ import {
 import { enhancer } from "addon-redux";
 import timelineReducer from "../entities/timeline";
 import cardReducer from "../entities/cards";
-import { Timeline, Moment, BranchPoint, UIState, Card } from "../entities/data";
+import featsReducer from "../entities/feats";
+
+import { Timeline, Moment, BranchPoint, UIState, Card, Feat } from "../entities/data";
 
 export type RootState = {
   board: {
@@ -18,6 +20,7 @@ export type RootState = {
     ui: UIState;
   };
   cards: EntityState<Card>;
+  feats: EntityState<Feat>;
 };
 
 // convert object to string and store in localStorage
@@ -44,7 +47,11 @@ function loadFromLocalStorage() {
 }
 
 export const store = configureStore<RootState>({
-  reducer: combineReducers({ board: timelineReducer, cards: cardReducer }),
+  reducer: combineReducers({
+    board: timelineReducer,
+    cards: cardReducer,
+    feats: featsReducer,
+  }),
   preloadedState: loadFromLocalStorage(),
   enhancers: [enhancer],
 });
